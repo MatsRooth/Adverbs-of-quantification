@@ -14,7 +14,7 @@ derivation: (D ((Z (U so)) ((Z ((Z (U L)) (a duck))) (U awoke))))
 169 edges -- Done parsing.
 #<output_port:stdout>
 ```
-The caret symbols are read as lambda. The semantics is a relation that holds between a world w and an individual y iff y is a duck in q, and y awoke in w.  The lambda variable y models a discourse referent for the duck.
+The caret symbols are read as lambda. The semantics is a relation that holds between a world w and an individual y iff y is a duck in w, and y awoke in w.  The lambda variable y models a discourse referent for the duck.
 
 ```
 make duck1b.show
