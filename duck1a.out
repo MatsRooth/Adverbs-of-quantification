@@ -1,0 +1,12 @@
+#unspecified
+#unspecified
+#unspecified
+(Processing:  (so a duck awoke))
+
+-------------------
+edge      : 138 so a duck awoke	(0 4)	(s + (e + t)) 
+semantics : (^ w (^ y ((duck w y) & (awake w y))))
+proofnet  : ((s + ((1 . e) + (2 . t))) (so ((s + (3 . t)) / (4 . t))) (a (((s + ((1 . e) + (2 . t))) // ((5 . e) \\ (s + (6 . t)))) / ((7 . e) \N (8 . t)))) (duck ((7 . e) \N (8 . t))) (awoke ((5 . e) \ (4 . t))))
+derivation: (D ((Z (U so)) ((Z ((Z (U L)) (a duck))) (U awoke))))
+169 edges -- Done parsing.
+#<output_port:stdout>

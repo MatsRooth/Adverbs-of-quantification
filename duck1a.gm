@@ -1,0 +1,110 @@
+;; Use type raiser for indefinites, but not for pronouns.
+;; Starting from dynamic5f.gm, add intensionality.
+
+(let ((moo 'm)
+      (Ap 2))
+ (set! grammar
+  `(
+    ((L ((2 / (1 \ 2)) / 1)) (^ x (^ f (f x))))       
+    ((U ((2 // (1 \\ 2)) / 1)) (^ x (^ f (f x))))
+
+    ;((D (1 / (1 // (t \\ t)))) (^ k (k (^ x x))))
+    ;; D has to be generalized for indefinites to
+    ;; scope as desired. They scope to (s + t) primitively.
+    ;; Generalize it to (2 + 3), enforcing that they scope
+    ;; to discourses, which are marked by the information
+    ;; state type. 
+    ((D (1 / (1 // ((s + t) \\ (s + t))))) (^ k (k (^ x x))))
+    
+    ;; Overt D for testing and controlling the derivation.
+    (("D" (1 / (1 // ((s + t) \\ (s + t))))) (^ k (k (^ x x))))
+
+
+    ;;((S (((4 // (2 \\ 5)) / (3 // (1 \\ 5))) / (4 // ((2 / 1) \\ 3))))
+    ;;  (^ L (^ R (^ c (L (^ l (R (^ r (c (l r))))))))))
+    ((Z (((5 // (2 \\ 3)) / (5 // (1 \\ 4))) / (4 // ((2 / 1) \\ 3))))
+      (^ L (^ R (^ c (R (^ r (L (^ l (c (l r))))))))))
+
+;; Convert a sentence to a discourse.
+    (("so" ((s + t) / t)) (^ x x))
+
+;; Conjunction taking s+t on the left, and t on the right.
+;; Does the argument order matter?
+    (("x" (((s + t) \ (s + t)) / t) ) (^ q (^ P (^ w ((P w) & (q w))))))
+
+;; Determiner that creates primitive indefinites that scope to (s + t).
+;; The semantics is adjusted to account for the world dref.
+;; P is the NP argument of the determiner.
+;; The continuation k has first an individual argument, then a world argument.
+; (("a" (((s + (e + t)) // (e \\ (s + t))) / (e \N t))) (^ P (^ k (^ w (^ y (((P y) w) & ((k (^ w y)) w)))))))
+ (("a" (((s + (e + t)) // (e \\ (s + t))) / (e \N t))) (^ P (^ k (^ w (^ y (((P y) w) & ((k y) w)))))))
+
+     ;; Modifier for indefinites that let them scope over information states
+     ;; with extra drefs.
+     ;; s + 1 information state assumed by the input
+     ;; s + 2 + 1 information state assumed by the output, with an added dref of type 2.
+     ;; P input indefinite with type (e > (s + 1))(s + (e + 1)). It applies to a
+     ;;   continuation of type (e > (s + 1)) to yield (s + (e + 1)), with an added dref.
+     ;;   The new indefinite should apply to (e > (s + (2 + 1))) to yield (s + (e + (2 + 1))).
+     ;;  (^ x (^ v (((k x) v) y))) continuation adjusted to look like the old one by plugging with y.
+     ;;  (P (^ x (^ v (((k x) v) y)))) Old indefinite applied to the above.
+     ;;  (((P (^ x (^ v (((k x) v) y)))) w) z)  Above with world and individual arguments saturated.
+     ;;  (^ w (^ z (^ y (((P (^ x (^ v (((k x) v) y)))) w) z)))) Free variables bound in the
+     ;;                                                right order for the output information state.
+     ;; The dance at the end is needed to bind y two steps inside.
+     ((Ri (((s + (e + (2 + 1))) // (e \\ (s + (2 + 1)))) / ( (s + (e + 1)) // (e \\ (s + 1)))))
+        (^ P (^ k (^ w (^ z (^ y (((P (^ x (^ v (((k x) v) y)))) w) z)))))))
+
+    ;; Center pronoun it1 scopes to an information state (e + 1).
+    ;; The continuation k has an individual argument for the in situ variable,
+    ;; an individual argument for the dref.
+    ;; The semantics equates the two individuals.
+    ;; Since there is no upstairs conjunct, a modifier allowing for extra
+    ;; drefs in the information state is not needed. This is polymorphic
+    ;; to begin with.
+    (("it1" ((s + (e + 1)) // (e \\ (s + (e + 1))))) 
+    	 (^ k (^ w (^ x (((k x) w) x)))))
+
+    ;; Pericenter pronoun.
+    ;; k continuation
+    ;; y in situ variable and pericenter
+    ;; x center, which is 'skipped'.
+    (("it2" ((s + (e + (e + 1))) // (e \\ (s + (e + (e + 1))))))
+    	 (^ k (^ w (^ x (^ y ((((k y) w) x) y))))))
+
+    ;; For pronouns, no type raiser is needed. They just equate the variables
+    ;; they don't add a conjunct upstairs.
+
+    ;; Verbs. In the semantics, they have an inside ^ w, which
+    ;; is not marked in the categorial type.
+    ;; I wish it could be an _outside_ ^ w.
+    (("phoned" ((e \ t) / e)) (^ y (^ x (^ w (phone w x y)))))
+    (("gave" (((e \ t) / e) / e)) (^ y (^ z (^ x (^ w (give w x y z))))))
+    (("awoke" (e \ t)) (^ x (^ w (awake w x))))
+    (("quacked" (e \ t)) (^ x (^ w (quack w x))))
+    (("barked" (e \ t)) (^ x (^ w (bark w x))))
+    (("broke" (e \ t)) (^ x (^ w (break w x))))
+
+    ;;; Lexical vocabulary
+    ;; Names. Also they have a ^ w.
+    (("justin" e) (^ w j))
+    (("mary" e) (^ w ,moo))
+
+    ;; (e \N t) is the multimodal type of NP. It has to be an argument
+    ;; of a determiner. 
+    (("duck" (e \N t)) (^ x (^ w (duck w x))))
+    (("goose" (e \N t)) (^ x (^ w (goose w x))))
+    (("dog" (e \N t)) (^ x (^ w (dog w x))))
+
+))    )
+
+;; (set! filter-cats '((s + t) (e + (s + t)) (e + (e + (s + t))) (e + (e + (e + (s + t))))))
+(set! filter-cats '((s + t) (s + (e + t)) (s + (e + (e + t))) (s + (e + (e + (e + t))))))
+
+(set! display-derivation? #f)
+
+
+(parse '(so a duck awoke))
+
+
+
